@@ -96,11 +96,9 @@ _B.Tech CSE (Data Science)_
 
 ## 📸 Screenshots
 
-> Add screenshots to show UI (e.g. form, table, modals)  
-Example:
+### ➕ Add Driver Form
+![Driver Form](Screenshot1.png)
 
-```md
-![Driver Form](screenshots/Screenshot1.png)
-![Driver Table](screenshots/Screenshot2.png)
-```
+### 📋 Driver Records Table
+![Driver Table](Screenshot2.png)
 
