@@ -100,7 +100,7 @@ _B.Tech CSE (Data Science)_
 Example:
 
 ```md
-![Driver Form](Screenshot1.png)
-![Driver Table](Screenshot2.png)
+![Driver Form](screenshots/Screenshot1.png)
+![Driver Table](screenshots/Screenshot2.png)
 ```
 
