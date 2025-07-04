@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Drivers</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4;">
+
+  <!-- Form -->
+  <div style="max-width: 1100px; margin: 50px auto; padding: 20px; background-color: #fff; border-radius: 10px;">
+    <h2 style="text-align: center;">Update Driver Information</h2>
+    <form id="driverForm" style="display: flex; align-items: flex-start; gap: 20px;">
+      <div><label><b>BBID</b></label><input type="text" id="bbid" required style="padding: 8px; width: 150px;"></div>
+      <div><label><b>Vehicle No.</b></label><input type="text" id="vehicleNo" required style="padding: 8px; width: 150px;"></div>
+      <div><label><b>Driver Name</b></label><input type="text" id="driverName" required style="padding: 8px; width: 150px;"></div>
+      <div><label><b>Mobile No.</b></label><input type="text" id="mobileNo" required style="padding: 8px; width: 150px;"></div>
+      <div><label><b>Driver Licence</b></label><input type="text" id="licenseNo" required style="padding: 8px; width: 150px;"></div>
+      <div style="display: flex; flex-direction: column; justify-content: end;">
+        <button type="submit" style="padding: 15px 50px; background-color: #4CAF50; color: white; border: none; border-radius: 5px;">Submit</button>
+      </div>
+    </form>
+  </div>
+
+ <!-- Filter Section -->
+<div style="max-width: 1100px; margin: 50px auto; padding: 20px; background-color: #fff; border-radius: 10px;">
+  <center><h2>List Of Drivers</h2></center>
+
+  <!-- Row 1: Driver Dropdown + Search Button -->
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 20px;">
+    <label for="driverFilter" style="font-weight: bold;">Drive List:</label>
+    <select id="driverFilter" style="padding: 8px; width: 200px;">
+      <option value="all">Get All Drivers</option>
+    </select>
+    <button onclick="loadTable()" style="padding: 8px 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px;">
+      Search Driver
+    </button>
+  </div>
+
+  <!-- Row 2: Date Range + Search Button -->
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
+    <label for="dateRange" style="font-weight: bold;">Pick Date Range:</label>
+    <input id="dateRange" style="padding: 8px; width: 250px;" placeholder="Select Date Range">
+    <button onclick="loadTable()" style="padding: 8px 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px;">
+      Search Driver
+    </button>
+  </div>
+</div>
+
+
+
+
+  <!-- Table -->
+  <div style="max-width: 900px; margin: 0 auto; padding: 20px;">
+    <h2 style="text-align: center;">Updated Driver Information</h2>
+    <table border="1" cellpadding="10" cellspacing="0" id="driverTable" style="width: 100%; text-align: center;">
+      <thead>
+        <tr>
+          <th>BBID</th>
+          <th>Vehicle No.</th>
+          <th>Driver Name</th>
+          <th>Mobile No.</th>
+          <th>Driver Licence</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+   <!-- Modal -->
+  <!-- Modal -->
+<div id="editModal" style="display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+  <div style="background-color: white; margin: 50px auto; padding: 30px; width: 500px; border-radius: 10px; display: flex; flex-direction: column; gap: 10px;">
+    <h3 style="margin-bottom: 10px;">Edit Driver Info</h3>
+
+    <label for="editBbid"><b>BBID :</b></label>
+    <input id="editBbid" type="text" style="padding: 10px; font-size: 14px;" readonly>
+
+    <label for="editVehicleNo"><b>Vehicle No.:</b></label>
+    <input id="editVehicleNo" type="text" style="padding: 10px; font-size: 14px;">
+
+    <label for="editDriverName"><b>Driver Name :</b></label>
+    <input id="editDriverName" type="text" style="padding: 10px; font-size: 14px;">
+
+    <label for="editMobileNo"><b>Mobile No. :</b></label>
+    <input id="editMobileNo" type="text" style="padding: 10px; font-size: 14px;">
+
+    <label for="editLicenseNo"><b>Licence No. :</b></label>
+    <input id="editLicenseNo" type="text" style="padding: 10px; font-size: 14px;">
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+      <button id="updateBtn" style="background-color: #4CAF50; color: white; padding: 10px 25px; border: none; border-radius: 5px; font-size: 14px;">Update</button>
+      <button id="cancelBtn" style="background-color: gray; color: white; padding: 10px 25px; border: none; border-radius: 5px; font-size: 14px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    let currentRow = null;
+
+    document.getElementById("driverForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const bbid = document.getElementById("bbid").value.trim();
+      const vehicleNo = document.getElementById("vehicleNo").value.trim();
+      const driverName = document.getElementById("driverName").value.trim();
+      const mobileNo = document.getElementById("mobileNo").value.trim();
+      const licenseNo = document.getElementById("licenseNo").value.trim();
+
+      if (!bbid || !vehicleNo || !driverName || !mobileNo || !licenseNo) return alert("❗ Fill all fields");
+      if (!/^\d+$/.test(bbid)) return alert("🔢 BBID must be numbers only.");
+      if (!/^[a-zA-Z0-9\s]+$/.test(vehicleNo)) return alert("🚗 Vehicle No. must be alphanumeric.");
+      if (!/^[a-zA-Z\s]{3,}$/.test(driverName)) return alert("👤 Driver Name must be at least 3 letters.");
+      if (!/^\d{10}$/.test(mobileNo)) return alert("📱 Mobile No. must be exactly 10 digits.");
+      if (!/^[a-zA-Z0-9]{5,20}$/.test(licenseNo)) return alert("🪪 License must be 5–20 characters.");
+
+      fetch("/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bbid, vehicleNo, driverName, mobileNo, licenseNo })
+      }).then(res => res.text())
+        .then(() => {
+          Swal.fire('Success!', 'Driver added successfully.', 'success');
+          document.getElementById("driverForm").reset();
+          populateDriverFilter(); // ✅ Re-fetch dropdown after new entry
+          loadTable();
+        });
+    });
+
+    // ✅ Load driver names into dropdown
+    function populateDriverFilter() {
+      fetch('/driver-names')
+        .then(res => res.json())
+        .then(data => {
+          const filter = document.getElementById('driverFilter');
+          filter.innerHTML = '<option value="all">Get All Drivers</option>';
+          data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.driver_name;
+            option.textContent = item.driver_name;
+            filter.appendChild(option);
+          });
+        });
+    }
+
+    // ✅ Load table based on dropdown filter
+    function loadTable() {
+  const selected = document.getElementById("driverFilter").value;
+  const dateRange = document.getElementById("dateRange").value;
+
+  let url = "/drivers";
+  const params = new URLSearchParams();
+
+  if (selected !== "all") params.append("name", selected);
+  if (dateRange) params.append("dateRange", dateRange);
+  if (params.toString()) url += "?" + params.toString();
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector("#driverTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.bbid}</td>
+            <td>${row.vehicle_no}</td>
+            <td>${row.driver_name}</td>
+            <td>${row.mobile_no}</td>
+            <td>${row.license_no}</td>
+            <td>
+              <button onclick="openEditModal(this)" style="background: green; color: white; padding: 5px 10px;">Edit</button>
+              <button onclick="confirmDelete(this)" style="background: red; color: white; padding: 5px 10px;">Delete</button>
+            </td>
+          </tr>`;
+      });
+      // ✅ Show Toast
+      Swal.fire({
+        toast: true,
+        icon: 'success',
+        title: `Fetched ${data.length} driver(s)`,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      });
+
+    });
+}
+   
+
+
+    // ✅ Edit Modal Logic
+    function openEditModal(btn) {
+      currentRow = btn.closest("tr");
+      document.getElementById("editBbid").value = currentRow.cells[0].innerText;
+      document.getElementById("editVehicleNo").value = currentRow.cells[1].innerText;
+      document.getElementById("editDriverName").value = currentRow.cells[2].innerText;
+      document.getElementById("editMobileNo").value = currentRow.cells[3].innerText;
+      document.getElementById("editLicenseNo").value = currentRow.cells[4].innerText;
+      document.getElementById("editModal").style.display = "block";
+    }
+
+    document.getElementById("cancelBtn").onclick = () => {
+      document.getElementById("editModal").style.display = "none";
+    };
+
+    document.getElementById("updateBtn").onclick = () => {
+      const bbid = document.getElementById("editBbid").value.trim();
+      const vehicleNo = document.getElementById("editVehicleNo").value.trim();
+      const driverName = document.getElementById("editDriverName").value.trim();
+      const mobileNo = document.getElementById("editMobileNo").value.trim();
+      const licenseNo = document.getElementById("editLicenseNo").value.trim();
+
+      fetch("/edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bbid, vehicleNo, driverName, mobileNo, licenseNo })
+      }).then(res => res.text())
+        .then(() => {
+          Swal.fire('Updated!', 'Driver info updated.', 'success');
+          document.getElementById("editModal").style.display = "none";
+          populateDriverFilter();
+          loadTable();
+        });
+    };
+    flatpickr("#dateRange", {
+  mode: "range",
+  dateFormat: "Y-m-d",
+});
+
+
+    // ✅ Delete logic
+    function confirmDelete(btn) {
+      const bbid = btn.closest("tr").children[0].innerText;
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "This will delete the entry permanently.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch("/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bbid })
+          }).then(() => {
+            Swal.fire('Deleted!', 'Entry has been removed.', 'success');
+            populateDriverFilter();
+            loadTable();
+          });
+        }
+      });
+    }
+
+    // ✅ Load everything on page load
+    window.onload = () => {
+      populateDriverFilter();
+      loadTable();
+    };
+    
+  </script>
+
+</body>
+</html>
